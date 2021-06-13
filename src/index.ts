@@ -41,35 +41,52 @@ const login = async (id: string, password: string, page: Page) => {
   await loginButton.click();
 };
 
-const transitByButtonClick = async (page: Page, selector: string) => {
+const transitByButtonClick = async (
+  page: Page,
+  selector: string,
+  navigation = true
+) => {
   await page.waitForSelector(selector);
   const buttonElement = await page.$(selector);
   if (!buttonElement) {
     throw new Error(`element of ${selector} is not found`);
   }
-
-  await buttonElement.click();
+  if (navigation) {
+    await Promise.all([buttonElement.click(), page.waitForNavigation()]);
+  } else {
+    await buttonElement.click();
+  }
 };
 
 const pressGood = async (page: Page, limit: number) => {
   let index = 1;
-  while (true) {
+  while (index <= limit) {
     await transitByButtonClick(
       page,
-      `.gyousyu_color:nth-child(${index}) .top_diary_right a`
+      `#ranking > div.ranking_list > ul > li:nth-child(${index}) > table > tbody > tr > td:nth-child(4) > div.top_diary > div.top_diary_right > div.top_diary_title > a`
     );
+
     try {
-      await transitByButtonClick(page, "add_super_good");
-      await transitByButtonClick(page, "send_super_good");
-      await page.goBack();
+      // いいね済みは押せないのでスキップ
+      const styleProperty = (await (await (await page.$(
+        "#added_super_good"
+      ))!.getProperty("style"))!.jsonValue()) as Object;
+
+      const isPressed = Object.keys(styleProperty).length === 0;
+      if (isPressed) {
+        await Promise.all([page.goBack(), page.waitForNavigation()]);
+        index++;
+        continue;
+      }
+
+      await transitByButtonClick(page, "#add_super_good", false);
+      await transitByButtonClick(page, "#send_super_good", false);
+      await Promise.all([page.goBack(), page.waitForNavigation()]);
     } catch (error) {
       // エラー時も次へ
       console.log(error);
     }
     index++;
-    if (index === limit) {
-      break;
-    }
   }
 };
 
