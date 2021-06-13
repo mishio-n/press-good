@@ -20,7 +20,6 @@ const run = async (url: string) => {
 
   // 指定人数 いいね を押す
   await pressGood(page, 5);
-  await page.waitForTimeout(10000);
   await browser.close();
 };
 
