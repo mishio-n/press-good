@@ -14,12 +14,12 @@ const run = async (url: string) => {
   await login(id, password, page);
 
   // エリア選択
-  await transitByButtonClick(page, "#area_list a:nth-child(2)");
+  await transitByButtonClick(page, "#area_list a:nth-child(1)");
   // ランキングページ
   await transitByButtonClick(page, "a:nth-child(6) > span");
 
   // 指定人数 いいね を押す
-  await pressGood(page, 5);
+  await pressGood(page, 10);
   await browser.close();
 };
 
@@ -48,6 +48,7 @@ const transitByButtonClick = async (
 ) => {
   await page.waitForSelector(selector);
   const buttonElement = await page.$(selector);
+
   if (!buttonElement) {
     throw new Error(`element of ${selector} is not found`);
   }
@@ -68,19 +69,20 @@ const pressGood = async (page: Page, limit: number) => {
 
     try {
       // いいね済みは押せないのでスキップ
-      const styleProperty = (await (await (await page.$(
-        "#added_super_good"
-      ))!.getProperty("style"))!.jsonValue()) as Object;
+      // const styleProperty = (await (await (await page.$(
+      //   "#added_super_good"
+      // ))!.getProperty("style"))!.jsonValue()) as Object;
 
-      const isPressed = Object.keys(styleProperty).length === 0;
+      const goodButtonElement = await page.$("#iine_done");
+      const isPressed = !!goodButtonElement;
       if (isPressed) {
         await Promise.all([page.goBack(), page.waitForNavigation()]);
         index++;
         continue;
       }
 
-      await transitByButtonClick(page, "#add_super_good", false);
-      await transitByButtonClick(page, "#send_super_good", false);
+      await transitByButtonClick(page, "a.bt_iine", false);
+      // await transitByButtonClick(page, "#send_super_good", false);
       await Promise.all([page.goBack(), page.waitForNavigation()]);
     } catch (error) {
       // エラー時も次へ
