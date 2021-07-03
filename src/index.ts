@@ -75,15 +75,16 @@ const pressGood = async (page: Page, limit: number) => {
       ))!.getProperty("style"))!.jsonValue()) as Object;
 
       const isPressed = !Object.values(styleProperty).includes("display");
+      console.log(isPressed);
       if (isPressed) {
         await Promise.all([page.goBack(), page.waitForNavigation()]);
         index++;
         continue;
       }
 
-      // await transitByButtonClick(page, "a.bt_iine", false);
-      // // await transitByButtonClick(page, "#send_super_good", false);
-      // await Promise.all([page.goBack(), page.waitForNavigation()]);
+      await transitByButtonClick(page, "a.bt_iine", false);
+      // await transitByButtonClick(page, "#send_super_good", false);
+      await Promise.all([page.goBack(), page.waitForNavigation()]);
     } catch (error) {
       // エラー時も次へ
       console.log(error);
