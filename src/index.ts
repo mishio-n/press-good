@@ -62,28 +62,28 @@ const transitByButtonClick = async (
 const pressGood = async (page: Page, limit: number) => {
   let index = 1;
   while (index <= limit) {
+    await page.waitForTimeout(5000);
     await transitByButtonClick(
       page,
       `#ranking > div.ranking_list > ul > li:nth-child(${index}) > table > tbody > tr > td:nth-child(4) > div.top_diary > div.top_diary_right > div.top_diary_title > a`
     );
-
+    console.log(index);
     try {
       // いいね済みは押せないのでスキップ
-      // const styleProperty = (await (await (await page.$(
-      //   "#added_super_good"
-      // ))!.getProperty("style"))!.jsonValue()) as Object;
+      const styleProperty = (await (await (await page.$(
+        "#iine_done"
+      ))!.getProperty("style"))!.jsonValue()) as Object;
 
-      const goodButtonElement = await page.$("#iine_done");
-      const isPressed = !!goodButtonElement;
+      const isPressed = !Object.values(styleProperty).includes("display");
       if (isPressed) {
         await Promise.all([page.goBack(), page.waitForNavigation()]);
         index++;
         continue;
       }
 
-      await transitByButtonClick(page, "a.bt_iine", false);
-      // await transitByButtonClick(page, "#send_super_good", false);
-      await Promise.all([page.goBack(), page.waitForNavigation()]);
+      // await transitByButtonClick(page, "a.bt_iine", false);
+      // // await transitByButtonClick(page, "#send_super_good", false);
+      // await Promise.all([page.goBack(), page.waitForNavigation()]);
     } catch (error) {
       // エラー時も次へ
       console.log(error);
